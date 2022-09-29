@@ -15,18 +15,49 @@ export default class CreateFlowCommand implements Validable {
   }
 
 
+  @ApiOperationGet({
+    path: "/list/all",
+    description: "Get list ai-flows",
+    summary: "All flows",
+    responses: {
+      200: {
+        description: "Success",
+        model: models.SearchResponseAPI.name,
+        options: {
+          modelSubstitution: {
+            name: "SearchFlowResponseAPI",
+            keys: {
+              objects: {
+                model: ModelAPI.name,
+              },
+            },
+          },
+        },
+      },
+    },
+  })
   /**
-   * a method that returns a promise with the errors validation of the dto instance attribute
+   *  a controller with a list/all route of type GET, use the commandBus to throw a command and if all is ok response with the status 200.
+   * @param req express.Request
+   * @param res express.Response,
    */
-  static doValidation(container: inversify.Container): Promise<errors.CommandError[]> {
+  @httpGet("/list/all")
+  public async listAll(
+    @request() req: express.Request,
+    @response() res: express.Response
+  ) {
+    if (handlerResponse.hasErrors()) {
+      this.setErrorResponse(handlerResponse, req, res);
+    } else {
+      const response: Flow.Search.Response =
+        handlerResponse as Flow.Search.Response;
 
-    return new Promise<errors.CommandError[]>(async (resolve, reject) => {
-
-      const errors: errors.CommandError[] = Array<errors.CommandError>();
-
-      errors.push(...await this.dto.doValidation(container));
-
-      return resolve(errors);
-    });
+      res.status(200).json(
+        new models.SearchResponseAPI(
+          response.flows.map((d) => FlowAPI.fromDomain(d)),
+          response.total
+        )
+      );
+    }
   }
 }

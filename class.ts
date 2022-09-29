@@ -18,7 +18,7 @@ export default class CreateFlowCommand implements Validable {
   /**
    * a method that returns a promise with the errors validation of the dto instance attribute
    */
-  doValidation(container: inversify.Container): Promise<errors.CommandError[]> {
+  static doValidation(container: inversify.Container): Promise<errors.CommandError[]> {
 
     return new Promise<errors.CommandError[]>(async (resolve, reject) => {
 
